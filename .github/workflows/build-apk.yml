@@ -1,0 +1,55 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v2
+    
+    - name: Install Cordova
+      run: |
+        npm install -g cordova
+    
+    - name: Create Cordova project
+      run: |
+        cordova create DiyaApp com.diya.app DiyaApp
+        cd DiyaApp
+        rm -rf www/*
+        cp -r ../index.html www/
+        cp -r ../access www/
+        cp -r ../manifest.json www/ || true
+        cp -r ../photo.jpg www/ || true
+        cp -r ../photo_rights.jpg www/ || true
+        cp -r ../sign.png www/ || true
+    
+    - name: Add Android platform
+      run: |
+        cd DiyaApp
+        cordova platform add android
+    
+    - name: Build APK
+      run: |
+        cd DiyaApp
+        cordova build android --release
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: diya-app
+        path: DiyaApp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
