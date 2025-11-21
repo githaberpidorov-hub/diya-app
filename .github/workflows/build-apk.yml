@@ -31,12 +31,27 @@ jobs:
         cordova create DiyaApp com.diya.app DiyaApp
         cd DiyaApp
         rm -rf www/*
-        cp -r ../index.html www/
-        cp -r ../access www/
-        cp -r ../manifest.json www/ || true
-        cp -r ../photo.jpg www/ || true
-        cp -r ../photo_rights.jpg www/ || true
-        cp -r ../sign.png www/ || true
+        
+        # Копируем файлы (проверяем существование)
+        if [ -f "../index.html" ]; then
+          cp ../index.html www/
+        else
+          echo "Error: index.html not found!"
+          ls -la ..
+          exit 1
+        fi
+        
+        if [ -d "../access" ]; then
+          cp -r ../access www/
+        fi
+        
+        [ -f "../manifest.json" ] && cp ../manifest.json www/ || true
+        [ -f "../photo.jpg" ] && cp ../photo.jpg www/ || true
+        [ -f "../photo_rights.jpg" ] && cp ../photo_rights.jpg www/ || true
+        [ -f "../sign.png" ] && cp ../sign.png www/ || true
+        
+        echo "Files in www:"
+        ls -la www/
     
     - name: Add Android platform
       run: |
